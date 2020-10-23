@@ -29,9 +29,10 @@ namespace OceanOfCode
             // Write an action using Console.WriteLine()
             // To debug: Console.Error.WriteLine("Debug messages...");
 
-            Console.WriteLine("7 7");
-
             var service = new Service(new Ship(myId), new Opponent(), map);
+
+            var (initialX, initialY) = service.GetStartPosition();
+            Console.WriteLine($"{initialX} {initialY}");
 
             // game loop
             while (true)

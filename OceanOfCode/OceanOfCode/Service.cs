@@ -198,5 +198,24 @@ namespace OceanOfCode
             Console.WriteLine(string.Join(" | ", Commands.Select(x => x.Execute()).ToList()));
         }
 
+        public (int x, int y) GetStartPosition()
+        {
+            var initialX = 7;
+            int initialY = 7;
+
+            while (!Map.IsEmptyCell(initialX, initialY))
+            {
+                if (initialX == 14)
+                {
+                    initialX = 0;
+                }
+                else
+                {
+                    initialX++;
+                }
+            }
+
+            return (initialX, initialY);
+        }
     }
 }
