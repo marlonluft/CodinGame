@@ -1,5 +1,8 @@
-﻿using System;
+﻿using OceanOfCode.Entity;
+using OceanOfCode.Enumerator;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace OceanOfCode
@@ -31,98 +34,63 @@ namespace OceanOfCode
             // To debug: Console.Error.WriteLine("Debug messages...");
 
             Console.WriteLine("7 7");
-            var myShip = new Ship(map);
+
+            var service = new Service(new Ship(myId), new Opponent(), map);
 
             // game loop
             while (true)
             {
                 inputs = Console.ReadLine().Split(' ');
 
-                myShip.UpdateData(inputs);
-                myShip.Execute();
+                service.UpdateData(inputs);
+                service.Execute();
             }
         }
     }
 
-    public class Ship
+    public class Service
     {
-        public int MyLife { get; set; }
-        public int OppLife { get; set; }
+        public Ship MyShip { get; private set; }
+        public Opponent Opponent { get; private set; }
+        public Map Map { get; private set; }
 
-        public int MyPositionX { get; set; }
-        public int MyPositionY { get; set; }
-
-        public int TorpedoCooldown { get; set; }
-
-        private List<string> OpponentOrders = null;
         private List<string> commands = null;
-        private char[,] map = null;
 
-        public Ship(char[,] gameMap)
+        public Service(Ship ship, Opponent opponent, char[,] gameMap)
         {
-            MyLife =
-            OppLife =
-            MyPositionX =
-            MyPositionY =
-            TorpedoCooldown = 0;
-
             commands =
-            OpponentOrders =
             new List<string>();
 
-            map = gameMap;
+            MyShip = ship;
+            Opponent = opponent;
+            Map = new Map(gameMap);
         }
 
         public void UpdateData(string[] inputs)
         {
-            MyPositionX = int.Parse(inputs[0]);
-            MyPositionY = int.Parse(inputs[1]);
+            MyShip.Position = new Point(int.Parse(inputs[0]), int.Parse(inputs[1]));
 
             // Update where my ship's on map
-            map[MyPositionX, MyPositionY] = 'M';
+            Map.MoveShip(MyShip.Position);
 
-            MyLife = int.Parse(inputs[2]);
-            OppLife = int.Parse(inputs[3]);
+            MyShip.Life = int.Parse(inputs[2]);
+            Opponent.Life = int.Parse(inputs[3]);
 
-            TorpedoCooldown = int.Parse(inputs[4]);
+            MyShip.Torpedo.Cooldown = int.Parse(inputs[4]);
             int sonarCooldown = int.Parse(inputs[5]);
             int silenceCooldown = int.Parse(inputs[6]);
             int mineCooldown = int.Parse(inputs[7]);
 
             string sonarResult = Console.ReadLine();
-            OpponentOrders = Console.ReadLine().Split('|').ToList();
+            Opponent.Orders.AddRange(Console.ReadLine().Split('|').ToList());
         }
 
-        private void MoveNorth()
+        private void MoveShip(ECardinalDirection direction)
         {
-            var torpedo = TorpedoCooldown > 0 ? " TORPEDO" : string.Empty;
-            map[MyPositionX, MyPositionY] = 'B';
+            var torpedo = MyShip.Torpedo.Cooldown > 0 ? " TORPEDO" : string.Empty;
+            Map.BlockCell(MyShip.Position);
 
-            commands.Add($"MOVE N{torpedo}");
-        }
-
-        private void MoveEast()
-        {
-            var torpedo = TorpedoCooldown > 0 ? " TORPEDO" : string.Empty;
-            map[MyPositionX, MyPositionY] = 'B';
-
-            commands.Add($"MOVE E{torpedo}");
-        }
-
-        private void MoveWest()
-        {
-            var torpedo = TorpedoCooldown > 0 ? " TORPEDO" : string.Empty;
-            map[MyPositionX, MyPositionY] = 'B';
-
-            commands.Add($"MOVE W{torpedo}");
-        }
-
-        private void MoveSouth()
-        {
-            var torpedo = TorpedoCooldown > 0 ? " TORPEDO" : string.Empty;
-            map[MyPositionX, MyPositionY] = 'B';
-
-            commands.Add($"MOVE S{torpedo}");
+            commands.Add($"MOVE {direction}{torpedo}");
         }
 
         private void Surface()
@@ -131,9 +99,10 @@ namespace OceanOfCode
             {
                 for (var y = 0; y < 15; y++)
                 {
-                    if (map[x, y] == 'B')
+                    var path = new Point(x, y);
+                    if (Map.IsBlockedCell(path))
                     {
-                        map[x, y] = '.';
+                        Map.ReleaseCell(path);
                     }
                 }
             }
@@ -146,72 +115,68 @@ namespace OceanOfCode
             commands.Add($"TORPEDO {x} {y}");
         }
 
-        private List<char> GetAvailableSlots()
+        private ECardinalDirection GetAvailableDirections()
         {
-            var availableSlots = new List<char>();
+            ECardinalDirection availableDirections = ECardinalDirection.None;
 
             // Check WEST
-            if (MyPositionX != 0 && map[MyPositionX - 1, MyPositionY] == '.') // First row
+            if (MyShip.Position.X != 0 && Map.IsEmptyCell(MyShip.Position.X - 1, MyShip.Position.Y)) // First row
             {
-                availableSlots.Add('W');
+                availableDirections |= ECardinalDirection.W;
             }
 
             // Check EAST
-            if (MyPositionX != 14 && map[MyPositionX + 1, MyPositionY] == '.') // last row
+            if (MyShip.Position.X != 14 && Map.IsEmptyCell(MyShip.Position.X + 1, MyShip.Position.Y)) // last row
             {
-                availableSlots.Add('E');
+                availableDirections |= ECardinalDirection.E;
             }
 
             // Check NORTH
-            if (MyPositionY != 0 && map[MyPositionX, MyPositionY - 1] == '.') // first column
+            if (MyShip.Position.Y != 0 && Map.IsEmptyCell(MyShip.Position.X, MyShip.Position.Y - 1)) // first column
             {
-                availableSlots.Add('N');
+                availableDirections |= ECardinalDirection.N;
             }
 
             // Check SOUTH
-            if (MyPositionY != 14 && map[MyPositionX, MyPositionY + 1] == '.') // last column
+            if (MyShip.Position.Y != 14 && Map.IsEmptyCell(MyShip.Position.X, MyShip.Position.Y + 1)) // last column
             {
-                availableSlots.Add('S');
+                availableDirections |= ECardinalDirection.S;
             }
 
-            return availableSlots;
+            return availableDirections;
         }
 
         public void Execute()
         {
-            // x = island
-            // . = empty
-            // M = my ship
-            // B = Blocked (already passed)
-
-            PrintMap();
+            Map.Print();
             commands.Clear();
 
-            List<char> availableSlots = GetAvailableSlots();
+            var availableDirections = GetAvailableDirections();
 
-            if (!availableSlots.Any())
+            if (availableDirections == ECardinalDirection.None)
             {
                 Surface();
             }
             else
             {
-                switch (availableSlots.First())
+                if (availableDirections.HasFlag(ECardinalDirection.N))
                 {
-                    case 'N':
-                        MoveNorth();
-                        break;
-                    case 'S':
-                        MoveSouth();
-                        break;
-                    case 'E':
-                        MoveEast();
-                        break;
-                    case 'W':
-                        MoveWest();
-                        break;
+                    MoveShip(ECardinalDirection.N);
+                }
+                else if (availableDirections.HasFlag(ECardinalDirection.S))
+                {
+                    MoveShip(ECardinalDirection.S);
+                }
+                else if (availableDirections.HasFlag(ECardinalDirection.E))
+                {
+                    MoveShip(ECardinalDirection.E);
+                }
+                else
+                {
+                    MoveShip(ECardinalDirection.W);
                 }
 
-                if (TorpedoCooldown == 0)
+                if (MyShip.Torpedo.Cooldown == 0)
                 {
                     //var torpedoOrder = OpponentOrders.Select(x => x.Split(' ').Where(y=>!string.IsNullOrWhiteSpace(y) && !y.Equals("TORPEDO"))).ToArray();
 
@@ -220,20 +185,6 @@ namespace OceanOfCode
             }
 
             Console.WriteLine(string.Join(" | ", commands));
-        }
-
-        private void PrintMap()
-        {
-            for (var x = 0; x < 15; x++)
-            {
-                var row = string.Empty;
-                for (var y = 0; y < 15; y++)
-                {
-                    row += map[x, y].ToString();
-                }
-
-                Console.Error.WriteLine(row);
-            }
         }
 
     }
