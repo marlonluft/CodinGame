@@ -50,5 +50,10 @@ namespace OceanOfCode.Entity
                 Console.Error.WriteLine(row);
             }
         }
+
+        internal bool IsIsland(int x, int y)
+        {
+            return Content[x, y] == MapConstant.ISLAND;
+        }
     }
 }
