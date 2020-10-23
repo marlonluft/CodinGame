@@ -133,7 +133,7 @@ namespace OceanOfCode
                 }
             }
 
-            Console.WriteLine(string.Join(" | ", Commands));
+            Console.WriteLine(string.Join(" | ", Commands.Select(x => x.Execute())));
         }
 
     }
