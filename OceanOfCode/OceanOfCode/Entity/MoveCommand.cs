@@ -34,7 +34,7 @@ namespace OceanOfCode.Entity
                 command.Add("TORPEDO");
             }
 
-            return string.Concat(' ', command);
+            return string.Join(' ', command);
         }
     }
 }
