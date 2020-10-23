@@ -54,6 +54,63 @@ namespace OceanOfCode
             Commands.Add(moveCommand);
         }
 
+        private void SendTorpedo()
+        {
+            var lastOpponentTorpedo = Opponent.Orders.Where(x => x.Contains("TORPEDO")).LastOrDefault();
+
+            if (lastOpponentTorpedo != null)
+            {
+                var availableCells = new List<Point>();
+
+                for (int x = 0; x < 15; x++)
+                {
+                    for (int y = 0; y < 15; y++)
+                    {
+                        int range = (x >= MyShip.Position.X) ?
+                            x - MyShip.Position.X : MyShip.Position.X - x;
+
+                        range += (y >= MyShip.Position.Y) ?
+                            y - MyShip.Position.Y : MyShip.Position.Y - y;
+
+                        if (range > 2 && range <= 4 && !Map.IsIsland(x, y))
+                        {
+                            availableCells.Add(new Point(x, y));
+                        }
+                    }
+                }
+
+                var opponentTorpedoPosition = lastOpponentTorpedo
+                    .ToUpper()
+                    .Replace("TORPEDO", string.Empty)
+                    .Trim()
+                    .Split(" ")
+                    .Select(x => int.Parse(x))
+                    .ToArray();
+
+                var torpedoPosition = new Point(opponentTorpedoPosition[0], opponentTorpedoPosition[1]);
+                if (!availableCells.Contains(torpedoPosition))
+                {
+                    // Check what's available cell is more close to the last opponent torpedo
+                    torpedoPosition = availableCells.Select(cell =>
+                    {
+                        return new
+                        {
+                            Score =
+                                ((cell.X >= torpedoPosition.X) ? cell.X - torpedoPosition.X : torpedoPosition.X - cell.X) +
+                                ((cell.Y >= torpedoPosition.Y) ? cell.Y - torpedoPosition.Y : torpedoPosition.Y - cell.Y),
+                            Cell = cell,
+                        };
+                    })
+                    .OrderBy(x => x.Score)
+                    .First()
+                    .Cell;
+                }
+
+                var moveCommand = new TorpedoCommand(torpedoPosition);
+                Commands.Add(moveCommand);
+            }
+        }
+
         private void Surface()
         {
             for (var x = 0; x < 15; x++)
@@ -115,6 +172,11 @@ namespace OceanOfCode
             }
             else
             {
+                if (MyShip.Torpedo.Cooldown == 0)
+                {
+                    SendTorpedo();
+                }
+
                 if (availableDirections.HasFlag(ECardinalDirection.N))
                 {
                     MoveShip(ECardinalDirection.N);
