@@ -1,5 +1,6 @@
 ﻿using OceanOfCode.Entity;
 using OceanOfCode.Enumerator;
+using OceanOfCode.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -53,17 +54,14 @@ namespace OceanOfCode
         public Ship MyShip { get; private set; }
         public Opponent Opponent { get; private set; }
         public Map Map { get; private set; }
-
-        private List<string> commands = null;
+        public List<ICommand> Commands { get; private set; }
 
         public Service(Ship ship, Opponent opponent, char[,] gameMap)
         {
-            commands =
-            new List<string>();
-
             MyShip = ship;
             Opponent = opponent;
             Map = new Map(gameMap);
+            Commands = new List<ICommand>();
         }
 
         public void UpdateData(string[] inputs)
@@ -87,10 +85,14 @@ namespace OceanOfCode
 
         private void MoveShip(ECardinalDirection direction)
         {
-            var torpedo = MyShip.Torpedo.Cooldown > 0 ? " TORPEDO" : string.Empty;
             Map.BlockCell(MyShip.Position);
 
-            commands.Add($"MOVE {direction}{torpedo}");
+            var moveCommand = new MoveCommand(direction)
+            {
+                Torpedo = MyShip.Torpedo.Cooldown > 0,
+            };
+
+            Commands.Add(moveCommand);
         }
 
         private void Surface()
@@ -107,12 +109,7 @@ namespace OceanOfCode
                 }
             }
 
-            commands.Add("SURFACE");
-        }
-
-        private void Torpedo(int x, int y)
-        {
-            commands.Add($"TORPEDO {x} {y}");
+            Commands.Add(new SurfaceCommand());
         }
 
         private ECardinalDirection GetAvailableDirections()
@@ -149,7 +146,7 @@ namespace OceanOfCode
         public void Execute()
         {
             Map.Print();
-            commands.Clear();
+            Commands.Clear();
 
             var availableDirections = GetAvailableDirections();
 
@@ -175,16 +172,9 @@ namespace OceanOfCode
                 {
                     MoveShip(ECardinalDirection.W);
                 }
-
-                if (MyShip.Torpedo.Cooldown == 0)
-                {
-                    //var torpedoOrder = OpponentOrders.Select(x => x.Split(' ').Where(y=>!string.IsNullOrWhiteSpace(y) && !y.Equals("TORPEDO"))).ToArray();
-
-                    //Torpedo(0,0);
-                }
             }
 
-            Console.WriteLine(string.Join(" | ", commands));
+            Console.WriteLine(string.Join(" | ", Commands));
         }
 
     }
