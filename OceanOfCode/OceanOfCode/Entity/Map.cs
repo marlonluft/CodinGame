@@ -35,14 +35,19 @@ namespace OceanOfCode.Entity
             Content[path.X, path.Y] = MapConstant.EMPTY;
         }
 
-        internal bool IsEmptyCell(int x, int y)
+        internal bool IsEmptyCell(int x, int y, List<Point> ignoredCells = null)
         {
-            if (x < 0 || x > 14 || y < 0 || y > 14)
+            if (
+                (ignoredCells == null || !ignoredCells.Any(cell => cell.X == x && cell.Y == y))
+                && x >= 0
+                && x <= 14
+                && y >= 0
+                && y <= 14)
             {
-                return false;
+                return Content[x, y] == MapConstant.EMPTY;
             }
 
-            return Content[x, y] == MapConstant.EMPTY;
+            return false;
         }
 
         internal void Print()
@@ -64,26 +69,26 @@ namespace OceanOfCode.Entity
             return Content[x, y] == MapConstant.ISLAND;
         }
 
-        internal List<Point> GetCellEmptyNeighborhood(int x, int y)
+        internal List<Point> GetCellEmptyNeighborhood(int x, int y, List<Point> ignoredCells = null)
         {
             var cells = new List<Point>();
 
-            if (IsEmptyCell(x + 1, y))
+            if (IsEmptyCell(x + 1, y, ignoredCells))
             {
                 cells.Add(new Point(x + 1, y));
             }
 
-            if (IsEmptyCell(x - 1, y))
+            if (IsEmptyCell(x - 1, y, ignoredCells))
             {
                 cells.Add(new Point(x - 1, y));
             }
 
-            if (IsEmptyCell(x, y + 1))
+            if (IsEmptyCell(x, y + 1, ignoredCells))
             {
                 cells.Add(new Point(x, y + 1));
             }
 
-            if (IsEmptyCell(x, y - 1))
+            if (IsEmptyCell(x, y - 1, ignoredCells))
             {
                 cells.Add(new Point(x, y - 1));
             }
@@ -105,7 +110,7 @@ namespace OceanOfCode.Entity
 
                         do
                         {
-                            var emptyNeighborhood = GetCellEmptyNeighborhood(currentCell.Value.X, currentCell.Value.Y);
+                            var emptyNeighborhood = GetCellEmptyNeighborhood(currentCell.Value.X, currentCell.Value.Y, highBannedPropability);
 
                             if (emptyNeighborhood.Count < 2)
                             {
