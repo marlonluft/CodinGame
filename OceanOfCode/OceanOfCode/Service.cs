@@ -14,6 +14,7 @@ namespace OceanOfCode
         public Opponent Opponent { get; private set; }
         public Map Map { get; private set; }
         public List<ICommand> Commands { get; private set; }
+        private List<ECardinalDirection> MovimentHistory { get; set; }
 
         public Service(Ship ship, Opponent opponent, char[,] gameMap)
         {
@@ -21,6 +22,7 @@ namespace OceanOfCode
             Opponent = opponent;
             Map = new Map(gameMap);
             Commands = new List<ICommand>();
+            MovimentHistory = new List<ECardinalDirection>();
         }
 
         public void UpdateData(string[] inputs)
@@ -176,6 +178,7 @@ namespace OceanOfCode
 
             if (availableDirections == ECardinalDirection.None)
             {
+                MyShip.Surfaced = true;
                 Surface();
             }
             else
@@ -185,22 +188,51 @@ namespace OceanOfCode
                     SendTorpedo();
                 }
 
-                if (availableDirections.HasFlag(ECardinalDirection.W))
+                var moveDirection = ECardinalDirection.E;
+
+                if (MyShip.Surfaced && !MovimentHistory.Any())
                 {
-                    MoveShip(ECardinalDirection.W);
+                    MyShip.Surfaced = false;
                 }
-                else if (availableDirections.HasFlag(ECardinalDirection.N))
+
+                if (MyShip.Surfaced)
                 {
-                    MoveShip(ECardinalDirection.N);
-                }
-                else if (availableDirections.HasFlag(ECardinalDirection.S))
-                {
-                    MoveShip(ECardinalDirection.S);
+                    var lastMoviment = MovimentHistory.Last();
+
+                    if (lastMoviment == ECardinalDirection.N)
+                    {
+                        moveDirection = ECardinalDirection.S;
+                    }
+                    else if (lastMoviment == ECardinalDirection.S)
+                    {
+                        moveDirection = ECardinalDirection.N;
+                    }
+                    else if (lastMoviment == ECardinalDirection.E)
+                    {
+                        moveDirection = ECardinalDirection.W;
+                    }
+
+                    MovimentHistory.RemoveAt(MovimentHistory.Count - 1);
                 }
                 else
                 {
-                    MoveShip(ECardinalDirection.E);
+                    if (availableDirections.HasFlag(ECardinalDirection.W))
+                    {
+                        moveDirection = ECardinalDirection.W;
+                    }
+                    else if (availableDirections.HasFlag(ECardinalDirection.N))
+                    {
+                        moveDirection = ECardinalDirection.N;
+                    }
+                    else if (availableDirections.HasFlag(ECardinalDirection.S))
+                    {
+                        moveDirection = ECardinalDirection.S;
+                    }
+
+                    MovimentHistory.Add(moveDirection);
                 }
+
+                MoveShip(moveDirection);
             }
 
             Console.WriteLine(string.Join(" | ", Commands.Select(x => x.Execute()).ToList()));

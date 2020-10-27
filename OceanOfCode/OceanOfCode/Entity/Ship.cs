@@ -12,6 +12,7 @@ namespace OceanOfCode.Entity
             Torpedo = new Power(3);
             Sonar = new Sonar();
             Silence = new Power(6);
+            Surfaced = false;
         }
 
         public int Id { get; set; }
@@ -20,5 +21,6 @@ namespace OceanOfCode.Entity
         public Power Torpedo { get; private set; }
         public Sonar Sonar { get; private set; }
         public Power Silence { get; private set; }
+        public bool Surfaced { get; set; }
     }
 }
