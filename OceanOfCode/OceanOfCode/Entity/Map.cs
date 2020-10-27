@@ -44,7 +44,7 @@ namespace OceanOfCode.Entity
                 var row = string.Empty;
                 for (var y = 0; y < 15; y++)
                 {
-                    row += Content[x, y].ToString();
+                    row += Content[y, x].ToString();
                 }
 
                 Console.Error.WriteLine(row);
