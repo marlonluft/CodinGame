@@ -38,7 +38,7 @@ namespace OceanOfCode
             MyShip.Silence.Cooldown = int.Parse(inputs[6]);
             int mineCooldown = int.Parse(inputs[7]);
 
-            string sonarResult = Console.ReadLine();
+            MyShip.Sonar.Result = Console.ReadLine();
             Opponent.Orders.AddRange(Console.ReadLine().Split('|').ToList());
         }
 
