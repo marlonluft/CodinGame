@@ -9,12 +9,16 @@ namespace OceanOfCode.Entity
             Id = id;
             Life = 6;
             Position = new Point();
-            Torpedo = new Power(3);            
+            Torpedo = new Power(3);
+            Sonar = new Power(4);
+            Silence = new Power(6);
         }
 
         public int Id { get; set; }
         public int Life { get; set; }
         public Point Position { get; set; }
         public Power Torpedo { get; private set; }
+        public Power Sonar { get; private set; }
+        public Power Silence { get; private set; }
     }
 }

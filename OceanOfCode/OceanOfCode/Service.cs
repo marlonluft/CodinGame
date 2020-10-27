@@ -34,8 +34,8 @@ namespace OceanOfCode
             Opponent.Life = int.Parse(inputs[3]);
 
             MyShip.Torpedo.Cooldown = int.Parse(inputs[4]);
-            int sonarCooldown = int.Parse(inputs[5]);
-            int silenceCooldown = int.Parse(inputs[6]);
+            MyShip.Sonar.Cooldown = int.Parse(inputs[5]);
+            MyShip.Silence.Cooldown = int.Parse(inputs[6]);
             int mineCooldown = int.Parse(inputs[7]);
 
             string sonarResult = Console.ReadLine();
