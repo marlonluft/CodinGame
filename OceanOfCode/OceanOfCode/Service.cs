@@ -133,25 +133,33 @@ namespace OceanOfCode
             ECardinalDirection availableDirections = ECardinalDirection.None;
 
             // Check WEST
-            if (MyShip.Position.X != 0 && Map.IsEmptyCell(MyShip.Position.X - 1, MyShip.Position.Y)) // First row
+            if (MyShip.Position.X != 0 
+                && Map.IsEmptyCell(MyShip.Position.X - 1, MyShip.Position.Y) 
+                && Map.GetCellEmptyNeighborhood(MyShip.Position.X - 1, MyShip.Position.Y).Count > 0) // First row
             {
                 availableDirections |= ECardinalDirection.W;
             }
 
             // Check EAST
-            if (MyShip.Position.X != 14 && Map.IsEmptyCell(MyShip.Position.X + 1, MyShip.Position.Y)) // last row
+            if (MyShip.Position.X != 14 
+                && Map.IsEmptyCell(MyShip.Position.X + 1, MyShip.Position.Y)
+                && Map.GetCellEmptyNeighborhood(MyShip.Position.X + 1, MyShip.Position.Y).Count > 0) // last row
             {
                 availableDirections |= ECardinalDirection.E;
             }
 
             // Check NORTH
-            if (MyShip.Position.Y != 0 && Map.IsEmptyCell(MyShip.Position.X, MyShip.Position.Y - 1)) // first column
+            if (MyShip.Position.Y != 0 
+                && Map.IsEmptyCell(MyShip.Position.X, MyShip.Position.Y - 1)
+                && Map.GetCellEmptyNeighborhood(MyShip.Position.X, MyShip.Position.Y - 1).Count > 0) // first column
             {
                 availableDirections |= ECardinalDirection.N;
             }
 
             // Check SOUTH
-            if (MyShip.Position.Y != 14 && Map.IsEmptyCell(MyShip.Position.X, MyShip.Position.Y + 1)) // last column
+            if (MyShip.Position.Y != 14 
+                && Map.IsEmptyCell(MyShip.Position.X, MyShip.Position.Y + 1)
+                && Map.GetCellEmptyNeighborhood(MyShip.Position.X, MyShip.Position.Y + 1).Count > 0) // last column
             {
                 availableDirections |= ECardinalDirection.S;
             }
