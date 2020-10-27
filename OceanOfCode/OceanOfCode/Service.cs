@@ -185,7 +185,11 @@ namespace OceanOfCode
                     SendTorpedo();
                 }
 
-                if (availableDirections.HasFlag(ECardinalDirection.N))
+                if (availableDirections.HasFlag(ECardinalDirection.W))
+                {
+                    MoveShip(ECardinalDirection.W);
+                }
+                else if (availableDirections.HasFlag(ECardinalDirection.N))
                 {
                     MoveShip(ECardinalDirection.N);
                 }
@@ -193,13 +197,9 @@ namespace OceanOfCode
                 {
                     MoveShip(ECardinalDirection.S);
                 }
-                else if (availableDirections.HasFlag(ECardinalDirection.E))
-                {
-                    MoveShip(ECardinalDirection.E);
-                }
                 else
                 {
-                    MoveShip(ECardinalDirection.W);
+                    MoveShip(ECardinalDirection.E);
                 }
             }
 
