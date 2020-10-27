@@ -208,22 +208,18 @@ namespace OceanOfCode
 
         public (int x, int y) GetStartPosition()
         {
-            var initialX = 7;
-            int initialY = 7;
-
-            while (!Map.IsEmptyCell(initialX, initialY))
+            for (int x = 0; x < 14; x++)
             {
-                if (initialX == 14)
+                for (int y = 14; y >= 0; y--)
                 {
-                    initialX = 0;
-                }
-                else
-                {
-                    initialX++;
+                    if (Map.IsEmptyCell(x, y))
+                    {
+                        return (x, y);
+                    }
                 }
             }
 
-            return (initialX, initialY);
+            return (0, 0);
         }
     }
 }
