@@ -1,10 +1,10 @@
 ﻿namespace OceanOfCode.Entity
 {
-    public class Torpedo
+    public class Power
     {
-        public Torpedo()
+        public Power(int defaultCooldown)
         {
-            Cooldown = 3;
+            Cooldown = defaultCooldown;
         }
 
         public int Cooldown { get; set; }
